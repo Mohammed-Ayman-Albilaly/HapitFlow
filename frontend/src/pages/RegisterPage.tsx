@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Lock, Mail, UserPlus } from 'lucide-react';
 
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
@@ -30,41 +31,67 @@ const RegisterPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-slate-950">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md p-8 rounded-3xl bg-slate-900/50 backdrop-blur-2xl border border-slate-800 shadow-2xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md p-10 rounded-3xl glass-panel"
       >
-        <h2 className="text-3xl font-bold text-center mb-8">Create Account</h2>
+        <div className="text-center mb-10">
+          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
+            <UserPlus className="text-white" size={24} />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-100 tracking-tight">Create Account</h2>
+          <p className="text-slate-400 mt-2">Join the elite circle of consistent achievers.</p>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm text-slate-400 mb-2">Email Address</label>
-            <input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none transition"
-              placeholder="alex@example.com"
-              required
-            />
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Email Address</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+              <input 
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-field pl-10"
+                placeholder="name@company.com"
+                required
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm text-slate-400 mb-2">Password</label>
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none transition"
-              placeholder="••••••••"
-              required
-            />
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+              <input 
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-field pl-10"
+                placeholder="••••••••"
+                required
+              />
+            </div>
           </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && (
+            <motion.p 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              className="text-red-400 text-sm font-medium text-center"
+            >
+              {error}
+            </motion.p>
+          )}
           <button 
             type="submit" 
-            className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold transition-all shadow-lg shadow-blue-500/20"
+            className="w-full btn-primary py-3"
           >
-            Join Now
+            Create Account
           </button>
+          <p className="text-center text-sm text-slate-500 mt-6">
+            Already have an account?{' '}
+            <Link to="/login" className="text-blue-500 hover:text-blue-400 font-medium transition-colors">
+              Sign In here
+            </Link>
+          </p>
         </form>
       </motion.div>
     </div>
