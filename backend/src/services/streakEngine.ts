@@ -1,5 +1,3 @@
-import { Frequency } from '@prisma/client';
-
 export interface StreakResult {
   currentStreak: number;
   longestStreak: number;
@@ -7,7 +5,7 @@ export interface StreakResult {
 
 export const calculateStreak = (
   completions: Date[],
-  frequency: Frequency
+  frequency: string
 ): StreakResult => {
   if (completions.length === 0) {
     return { currentStreak: 0, longestStreak: 0 };

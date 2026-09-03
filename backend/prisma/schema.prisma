@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -32,18 +32,13 @@ model Habit {
   id          String    @id @default(uuid())
   title       String
   description String?
-  frequency   Frequency @default(DAILY)
+  frequency   String    @default("DAILY") // Changed from Enum to String for SQLite compatibility
   createdAt   DateTime  @default(now())
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   categoryId  String
   category    Category  @relation(fields: [categoryId], references: [id])
   completions Completion[]
-}
-
-enum Frequency {
-  DAILY
-  WEEKLY
 }
 
 model Completion {

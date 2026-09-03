@@ -5,10 +5,11 @@ import { calculateStreak } from '../services/streakEngine';
 export const completeHabit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const habitId = Array.isArray(id) ? id[0] : id;
     const userId = (req as any).user.userId;
     
     const habit = await prisma.habit.findFirst({
-      where: { id, userId },
+      where: { id: habitId, userId },
     });
 
     if (!habit) {
@@ -22,7 +23,7 @@ export const completeHabit = async (req: Request, res: Response) => {
     // Idempotency check
     const existing = await prisma.completion.findFirst({
       where: {
-        habitId: id,
+        habitId: habitId,
         completedAt: {
           equals: today, // This depends on how Prisma handles Date objects
         },
@@ -32,7 +33,7 @@ export const completeHabit = async (req: Request, res: Response) => {
     // Note: In a production app, we'd use a custom date format or a dedicated Date field
     // For this MVP, we'll use a simplified check:
     const completions = await prisma.completion.findMany({
-      where: { habitId: id },
+      where: { habitId: habitId },
     });
     
     const alreadyCompleted = completions.some(c => 
@@ -45,7 +46,7 @@ export const completeHabit = async (req: Request, res: Response) => {
 
     await prisma.completion.create({
       data: {
-        habitId: id,
+        habitId: habitId,
         userId: userId,
         completedAt: today,
       },
@@ -53,7 +54,7 @@ export const completeHabit = async (req: Request, res: Response) => {
 
     // Recalculate streak
     const allCompletions = await prisma.completion.findMany({
-      where: { habitId: id },
+      where: { habitId: habitId },
       select: { completedAt: true },
     });
 
@@ -71,10 +72,11 @@ export const completeHabit = async (req: Request, res: Response) => {
 export const getHabitHistory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const habitId = Array.isArray(id) ? id[0] : id;
     const userId = (req as any).user.userId;
 
     const habit = await prisma.habit.findFirst({
-      where: { id, userId },
+      where: { id: habitId, userId },
     });
 
     if (!habit) {
@@ -82,7 +84,7 @@ export const getHabitHistory = async (req: Request, res: Response) => {
     }
 
     const history = await prisma.completion.findMany({
-      where: { habitId: id },
+      where: { habitId: habitId },
       orderBy: { completedAt: 'desc' },
     });
 

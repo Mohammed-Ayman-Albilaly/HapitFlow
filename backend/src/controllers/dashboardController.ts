@@ -51,7 +51,7 @@ export const getDashboardData = async (req: Request, res: Response) => {
       select: { completedAt: true },
     });
 
-    const heatmapMap = {};
+    const heatmapMap: Record<string, number> = {};
     allCompletions.forEach(c => {
       const dateStr = c.completedAt.toISOString().split('T')[0];
       heatmapMap[dateStr] = (heatmapMap[dateStr] || 0) + 1;

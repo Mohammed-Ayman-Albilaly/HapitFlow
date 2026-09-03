@@ -44,11 +44,12 @@ export const createHabit = async (req: Request, res: Response) => {
 export const updateHabit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const habitId = Array.isArray(id) ? id[0] : id;
     const { title, description, categoryId, frequency } = req.body;
     const userId = (req as any).user.userId;
 
     const habit = await prisma.habit.findFirst({
-      where: { id, userId },
+      where: { id: habitId, userId },
     });
 
     if (!habit) {
@@ -56,7 +57,7 @@ export const updateHabit = async (req: Request, res: Response) => {
     }
 
     const updatedHabit = await prisma.habit.update({
-      where: { id },
+      where: { id: habitId },
       data: {
         title,
         description,
@@ -73,10 +74,11 @@ export const updateHabit = async (req: Request, res: Response) => {
 export const deleteHabit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const habitId = Array.isArray(id) ? id[0] : id;
     const userId = (req as any).user.userId;
 
     const habit = await prisma.habit.findFirst({
-      where: { id, userId },
+      where: { id: habitId, userId },
     });
 
     if (!habit) {
@@ -84,7 +86,7 @@ export const deleteHabit = async (req: Request, res: Response) => {
     }
 
     await prisma.habit.delete({
-      where: { id },
+      where: { id: habitId },
     });
     res.status(204).send();
   } catch (error) {
