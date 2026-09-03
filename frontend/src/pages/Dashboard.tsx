@@ -5,6 +5,14 @@ import { Plus, Trash2, CheckCircle2, Circle, TrendingUp, Activity, Target } from
 import Heatmap from '../features/Heatmap';
 import BarChart from '../features/BarChart';
 
+const DEFAULT_CATEGORIES = [
+  { id: '1', name: 'Health & Fitness', color: '#10b981' },
+  { id: '2', name: 'Productivity & Work', color: '#3b82f6' },
+  { id: '3', name: 'Personal Growth', color: '#8b5cf6' },
+  { id: '4', name: 'Mindfulness & Well-being', color: '#f59e0b' },
+  { id: '5', name: 'Lifestyle & Daily', color: '#64748b' },
+];
+
 const HabitCard = ({ habit, onComplete, onDelete }: any) => {
   return (
     <motion.div 
@@ -69,11 +77,19 @@ const Dashboard = () => {
         dashboardService.getStats()
       ]);
       setHabits(habitsRes.data);
-      setCategories(catRes.data);
+      
+      // Use API categories if available, otherwise fallback to defaults
+      const apiCats = catRes.data;
+      setCategories(apiCats && apiCats.length > 0 ? apiCats : DEFAULT_CATEGORIES);
+      
       setStats(dashRes.data.stats);
       setWeeklyData(dashRes.data.weeklyData);
       setHeatmapData(dashRes.data.heatmapData);
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error('Error fetching data:', e);
+      // Fallback categories on error
+      setCategories(DEFAULT_CATEGORIES);
+    }
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -213,13 +229,9 @@ const Dashboard = () => {
                   required
                 >
                   <option value="" className="bg-slate-900">Select Category</option>
-                  {categories && categories.length > 0 ? (
-                    categories.map((cat: any) => (
-                      <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
-                    ))
-                  ) : (
-                    <option disabled>Loading categories...</option>
-                  )}
+                  {categories.map((cat: any) => (
+                    <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
+                  ))}
                 </select>
               </div>
               <div className="flex gap-3 pt-4">
