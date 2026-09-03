@@ -6,7 +6,6 @@ describe('Auth Endpoints', () => {
   const testUser = {
     email: 'test-qa@example.com',
     password: 'Password123!',
-    name: 'QA User'
   };
 
   beforeEach(async () => {
@@ -23,7 +22,12 @@ describe('Auth Endpoints', () => {
   });
 
   it('should fail registration with existing email', async () => {
-    await prisma.user.create({ data: testUser });
+    await prisma.user.create({
+      data: {
+        email: "test-qa@example.com",
+        password: "Password123!"
+      }
+    });
     
     const res = await request(app)
       .post('/api/auth/register')
