@@ -4,8 +4,8 @@ services:
     env: node
     plan: free
     rootDir: backend
-    buildCommand: npm install && npx prisma generate
-    startCommand: npm start
+    buildCommand: npm install
+    startCommand: sh -c "npx prisma generate && npm run build && npm start"
     envVars:
       - key: NODE_VERSION
         value: 20.12.0
@@ -15,5 +15,9 @@ services:
         value: 5000
       - key: DATABASE_URL
         sync: false
+      - key: DIRECT_URL
+        sync: false
       - key: CLIENT_URL
         sync: false
+      - key: PRISMA_SKIP_POSTINSTALL_GENERATE
+        value: "true"
