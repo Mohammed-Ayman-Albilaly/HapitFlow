@@ -12,8 +12,9 @@ export const getHabits = async (req: Request, res: Response) => {
       orderBy: { createdAt: 'desc' },
     });
     res.status(200).json(habits);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    console.error('[HabitController.getHabits] Error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 };
 
@@ -26,6 +27,15 @@ export const createHabit = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Title and category are required' });
     }
 
+    // Ensure the category belongs to the user before associating it with a habit
+    const category = await prisma.category.findFirst({
+      where: { id: categoryId, userId },
+    });
+
+    if (!category) {
+      return res.status(400).json({ message: 'Invalid category or category does not belong to the user' });
+    }
+
     const habit = await prisma.habit.create({
       data: {
         title,
@@ -36,8 +46,12 @@ export const createHabit = async (req: Request, res: Response) => {
       },
     });
     res.status(201).json(habit);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    console.error('[HabitController.createHabit] Error:', error);
+    res.status(400).json({ 
+      message: 'Failed to create habit', 
+      error: error.message || 'An unexpected error occurred' 
+    });
   }
 };
 
@@ -56,6 +70,15 @@ export const updateHabit = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Habit not found' });
     }
 
+    if (categoryId) {
+      const category = await prisma.category.findFirst({
+        where: { id: categoryId, userId },
+      });
+      if (!category) {
+        return res.status(400).json({ message: 'Invalid category or category does not belong to the user' });
+      }
+    }
+
     const updatedHabit = await prisma.habit.update({
       where: { id: habitId },
       data: {
@@ -66,8 +89,9 @@ export const updateHabit = async (req: Request, res: Response) => {
       },
     });
     res.status(200).json(updatedHabit);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    console.error('[HabitController.updateHabit] Error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 };
 
@@ -89,7 +113,8 @@ export const deleteHabit = async (req: Request, res: Response) => {
       where: { id: habitId },
     });
     res.status(204).send();
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+  } catch (error: any) {
+    console.error('[HabitController.deleteHabit] Error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 };
