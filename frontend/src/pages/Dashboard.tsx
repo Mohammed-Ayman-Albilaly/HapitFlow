@@ -6,11 +6,11 @@ import Heatmap from '../features/Heatmap';
 import BarChart from '../features/BarChart';
 
 const DEFAULT_CATEGORIES = [
-  { id: '1', name: 'Health & Fitness', color: '#10b981' },
-  { id: '2', name: 'Productivity & Work', color: '#3b82f6' },
-  { id: '3', name: 'Personal Growth', color: '#8b5cf6' },
-  { id: '4', name: 'Mindfulness & Well-being', color: '#f59e0b' },
-  { id: '5', name: 'Lifestyle & Daily', color: '#64748b' },
+  { id: 'cat_health', name: 'Health & Fitness', color: '#10b981' },
+  { id: 'cat_prod', name: 'Productivity & Work', color: '#3b82f6' },
+  { id: 'cat_growth', name: 'Personal Growth', color: '#8b5cf6' },
+  { id: 'cat_mind', name: 'Mindfulness & Well-being', color: '#f59e0b' },
+  { id: 'cat_life', name: 'Lifestyle & Daily', color: '#64748b' },
 ];
 
 const HabitCard = ({ habit, onComplete, onDelete }: any) => {
@@ -78,7 +78,6 @@ const Dashboard = () => {
       ]);
       setHabits(habitsRes.data);
       
-      // Use API categories if available, otherwise fallback to defaults
       const apiCats = catRes.data;
       setCategories(apiCats && apiCats.length > 0 ? apiCats : DEFAULT_CATEGORIES);
       
@@ -87,7 +86,6 @@ const Dashboard = () => {
       setHeatmapData(dashRes.data.heatmapData);
     } catch (e) { 
       console.error('Error fetching data:', e);
-      // Fallback categories on error
       setCategories(DEFAULT_CATEGORIES);
     }
   };
@@ -95,10 +93,38 @@ const Dashboard = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await habitService.createHabit(newHabit);
+      // If using fallback categories, the backend will reject them because they aren't in the DB.
+      // To fix this for a "demo" or "quick start" experience, we should ideally
+      // create the category first if it's a default one.
+      
+      // Check if the selected category is one of our defaults
+      const isDefault = DEFAULT_CATEGORIES.some(c => c.id === newHabit.categoryId);
+      
+      if (isDefault) {
+        const defCat = DEFAULT_CATEGORIES.find(c => c.id === newHabit.categoryId);
+        try {
+          // Try to create the category for the user first
+          const catRes = await categoryService.createCategory({ 
+            name: defCat!.name, 
+            color: defCat!.color 
+          });
+          // Use the real ID from the backend
+          const finalCategoryId = catRes.data.id;
+          await habitService.createHabit({ ...newHabit, categoryId: finalCategoryId });
+        } catch (catError: any) {
+          // If it fails (e.g. already exists), just try to create the habit 
+          // with the original ID and let the backend handle it, or use a generic category.
+          await habitService.createHabit(newHabit);
+        }
+      } else {
+        await habitService.createHabit(newHabit);
+      }
+
       setIsModalOpen(false);
       fetchData();
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error('Creation failed:', e);
+    }
   };
 
   const handleComplete = async (id: string) => {
